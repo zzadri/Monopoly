@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+client/dist
+server/data
+graphify-out
+.git
+.claude
+.env
+*.md
+docker-compose.yml
+.dockerignore
+*.sh
