@@ -6,7 +6,7 @@ graphify-out
 .git
 .claude
 .env
-*.md
+CLAUDE.*
 docker-compose.yml
 .dockerignore
 *.sh
