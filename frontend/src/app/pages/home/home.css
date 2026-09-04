@@ -1,0 +1,70 @@
+.home {
+  position: relative;
+  max-width: 34rem;
+  padding: 3rem 0 2rem;
+}
+
+.home__ornament {
+  position: absolute;
+  top: -1.5rem;
+  left: -1.5rem;
+  width: 3rem;
+  height: 3rem;
+  pointer-events: none;
+}
+
+.home__ornament-corner {
+  position: absolute;
+  inset: 0;
+  border-top: 2px solid var(--accent-soft);
+  border-left: 2px solid var(--accent-soft);
+  border-radius: 4px 0 0 0;
+  opacity: 0.6;
+}
+
+.home__title {
+  font-size: clamp(2.5rem, 5vw + 1rem, 4rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.home__subtitle {
+  margin: 1.5rem 0 0;
+  max-width: 30ch;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.home__actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.home__action {
+  padding: 0.8rem 1.6rem;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.home__action--primary {
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-pop);
+}
+
+.home__action--primary:hover {
+  background: linear-gradient(180deg, #7276f5, var(--accent));
+}
+
+.home__action:not(.home__action--primary):hover {
+  background: var(--surface-2);
+}
