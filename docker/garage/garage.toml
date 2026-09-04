@@ -1,0 +1,25 @@
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "sqlite"
+
+replication_factor = 1
+
+# Dev-only values - Garage does not support env var interpolation in this
+# file, override this file (bind-mount) for a real deployment.
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "garage:3901"
+rpc_secret = "fbf5a91847898d67af229b8fff03b40a93df1f5ab8f37b1739379baffe4e7b6b"
+
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "[::]:3900"
+root_domain = ".s3.localhost"
+
+[s3_web]
+bind_addr = "[::]:3902"
+root_domain = ".web.localhost"
+index = "index.html"
+
+[admin]
+api_bind_addr = "[::]:3903"
+admin_token = "8f090d1f1a7ce8f3dcca26ed8511eb1fc859139796a8f9285a79fb9042dc0466"

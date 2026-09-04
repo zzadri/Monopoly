@@ -1,0 +1,24 @@
+# Old reference project - never pushed
+old projet monopoly/
+# ne pas psuh les docs du projets
+docs/ 
+
+# Env
+.env
+.env.local
+
+# Node / Angular (front)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+npm-debug.log*
+
+# .NET (back)
+backend/**/bin/
+backend/**/obj/
+backend/**/*.user
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
