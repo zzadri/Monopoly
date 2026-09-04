@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Monopoly.Api/Monopoly.Api.csproj" />
+  <Project Path="Monopoly.Application/Monopoly.Application.csproj" />
+  <Project Path="Monopoly.Domain/Monopoly.Domain.csproj" />
+  <Project Path="Monopoly.Infrastructure/Monopoly.Infrastructure.csproj" />
+</Solution>
