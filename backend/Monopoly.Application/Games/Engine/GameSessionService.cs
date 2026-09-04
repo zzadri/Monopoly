@@ -228,7 +228,6 @@ public class GameSessionService(IMonopolyDbContext context)
                 game.Options.CagnotteVacances,
                 game.Options.Encheres,
                 game.Options.PasDeLoyerEnPrison,
-                game.Options.HypothequeSansLoyer,
                 game.Options.ConstructionEquilibree,
                 game.Options.MelangerOrdreJoueurs,
                 game.Options.TurnLimit),

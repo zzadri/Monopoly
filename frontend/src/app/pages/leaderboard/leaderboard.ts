@@ -25,6 +25,7 @@ const BOARDS = [
   { key: 'victoires', label: 'Victoires' },
   { key: 'parties', label: 'Parties jouées' },
   { key: 'patrimoine', label: 'Patrimoine' },
+  { key: 'faillites', label: 'Faillites infligées' },
 ] as const;
 
 @Component({

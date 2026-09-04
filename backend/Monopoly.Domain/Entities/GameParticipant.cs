@@ -26,6 +26,13 @@ public class GameParticipant
     /// <summary>Cartes "Sortez de prison" conservées.</summary>
     public int GetOutOfJailCards { get; set; }
 
+    /// <summary>
+    /// Faillites infligées à d'autres joueurs pendant CETTE partie. Reporté sur
+    /// le Player en fin de partie par ProgressionService (classement secondaire,
+    /// CONTEXT.md — Classement).
+    /// </summary>
+    public int BankruptciesInflicted { get; set; }
+
     /// <summary>Only set when Kind == BotDePartie (Monopoly.md §6).</summary>
     public BotDifficulty? BotDifficulty { get; set; }
 

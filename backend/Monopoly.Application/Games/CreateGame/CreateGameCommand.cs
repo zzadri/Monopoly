@@ -11,7 +11,6 @@ public record CreateGameCommand(
     bool CagnotteVacances,
     bool Encheres,
     bool PasDeLoyerEnPrison,
-    bool HypothequeSansLoyer,
     bool ConstructionEquilibree,
     decimal ArgentDepart,
     bool MelangerOrdreJoueurs,

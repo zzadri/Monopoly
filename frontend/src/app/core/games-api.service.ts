@@ -30,7 +30,6 @@ export interface CreateGameRequest {
   cagnotteVacances: boolean;
   encheres: boolean;
   pasDeLoyerEnPrison: boolean;
-  hypothequeSansLoyer: boolean;
   constructionEquilibree: boolean;
   argentDepart: number;
   melangerOrdreJoueurs: boolean;

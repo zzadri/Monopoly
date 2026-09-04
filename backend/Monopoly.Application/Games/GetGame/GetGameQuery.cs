@@ -16,7 +16,6 @@ public record GameDto(
     bool CagnotteVacances,
     bool Encheres,
     bool PasDeLoyerEnPrison,
-    bool HypothequeSansLoyer,
     bool ConstructionEquilibree,
     bool MelangerOrdreJoueurs,
     IReadOnlyList<GameParticipantDto> Participants

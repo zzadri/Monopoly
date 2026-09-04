@@ -68,7 +68,6 @@ export interface GameOptionsView {
   cagnotteVacances: boolean;
   encheres: boolean;
   pasDeLoyerEnPrison: boolean;
-  hypothequeSansLoyer: boolean;
   constructionEquilibree: boolean;
   melangerOrdreJoueurs: boolean;
   turnLimit: number;

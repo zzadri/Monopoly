@@ -51,6 +51,10 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 
+// Suit quelle connexion SignalR occupe quel siège, pour rendre un siège
+// abandonné à un Bot de repli (CONTEXT.md — Bot).
+builder.Services.AddSingleton<GamePresence>();
+
 builder.Services.AddCors(options =>
     options.AddPolicy("Front", policy => policy
         .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])

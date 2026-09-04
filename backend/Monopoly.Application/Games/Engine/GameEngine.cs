@@ -554,6 +554,19 @@ public sealed class GameEngine(GameAggregate state, Random random)
             }
         }
 
+        // Statistique de partie, tenue pour TOUS les sièges, bots compris :
+        // l'écran de fin affiche les faillites infligées par chaque joueur, et un
+        // bot qui ruine quelqu'un doit y figurer. Seule une faillite envers la
+        // banque n'est infligée par personne, d'où le test sur le créancier.
+        //
+        // Ce compteur n'atteint un Player que via ProgressionService, qui
+        // n'attribue rien si la partie compte un Bot de partie
+        // (CountsForXpAndClassements) et ne reporte que les sièges ayant un
+        // PlayerId — un Bot de partie n'en a pas. Le classement ne peut donc pas
+        // être alimenté par un bot, et le moteur n'a pas à connaître les Player.
+        if (creditor is not null)
+            creditor.BankruptciesInflicted++;
+
         if (creditor is not null && actor.Money > 0)
         {
             creditor.Money += actor.Money;

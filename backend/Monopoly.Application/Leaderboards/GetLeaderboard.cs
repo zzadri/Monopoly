@@ -25,6 +25,7 @@ public class GetLeaderboardQueryHandler(IMonopolyDbContext context) : IRequestHa
             "victoires" => ("Victoires", query.OrderByDescending(p => p.GamesWon).ThenByDescending(p => p.Xp)),
             "parties" => ("Parties jouées", query.OrderByDescending(p => p.GamesPlayed).ThenByDescending(p => p.Xp)),
             "patrimoine" => ("Plus gros patrimoine", query.OrderByDescending(p => p.BestNetWorth).ThenByDescending(p => p.Xp)),
+            "faillites" => ("Faillites infligées", query.OrderByDescending(p => p.BankruptciesInflicted).ThenByDescending(p => p.Xp)),
             _ => ("Niveau", query.OrderByDescending(p => p.Xp).ThenByDescending(p => p.GamesWon)),
         };
 
@@ -43,6 +44,7 @@ public class GetLeaderboardQueryHandler(IMonopolyDbContext context) : IRequestHa
                 "victoires" => p.GamesWon,
                 "parties" => p.GamesPlayed,
                 "patrimoine" => p.BestNetWorth,
+                "faillites" => p.BankruptciesInflicted,
                 _ => p.Xp
             })).ToList();
 

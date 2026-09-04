@@ -40,6 +40,7 @@ public class ProgressionService(IMonopolyDbContext context)
 
             player.Xp += XpForFinishing;
             player.GamesPlayed++;
+            player.BankruptciesInflicted += participant.BankruptciesInflicted;
 
             if (participant.Id == game.WinnerParticipantId)
             {

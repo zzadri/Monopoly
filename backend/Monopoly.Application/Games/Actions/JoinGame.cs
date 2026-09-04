@@ -40,7 +40,9 @@ public class JoinGameCommandHandler(
             existing.IsConnected = true;
             if (existing.Kind == ParticipantKind.BotDeRepli)
             {
-                existing.Kind = ParticipantKind.Account;
+                // Rendre le siège à ce qu'il était : un invité qui revient reste
+                // un invité. Seul un siège rattaché à un Player est un compte.
+                existing.Kind = existing.PlayerId is null ? ParticipantKind.Guest : ParticipantKind.Account;
                 existing.BotDifficulty = null;
             }
             await context.SaveChangesAsync(cancellationToken);

@@ -45,7 +45,6 @@ public record GameOptionsDto(
     bool CagnotteVacances,
     bool Encheres,
     bool PasDeLoyerEnPrison,
-    bool HypothequeSansLoyer,
     bool ConstructionEquilibree,
     bool MelangerOrdreJoueurs,
     int TurnLimit

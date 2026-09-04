@@ -24,19 +24,22 @@ export class GamePlayService {
   }
 
   async loadState(gameId: string): Promise<GameState> {
-    const secret = this.guestSecretFor(gameId);
-    const url = `${this.baseUrl}/games/${gameId}/state${secret ? `?guestSecret=${secret}` : ''}`;
-    const state = await firstValueFrom(this.http.get<GameState>(url));
+    const state = await firstValueFrom(
+      this.http.get<GameState>(`${this.baseUrl}/games/${gameId}/state`, {
+        headers: this.guestHeaders(gameId),
+      }),
+    );
     this.state.set(state);
     return state;
   }
 
   async join(gameId: string, guestName?: string): Promise<JoinGameResult> {
     const result = await firstValueFrom(
-      this.http.post<JoinGameResult>(`${this.baseUrl}/games/${gameId}/join`, {
-        guestName: guestName ?? null,
-        guestSecret: this.guestSecretFor(gameId),
-      }),
+      this.http.post<JoinGameResult>(
+        `${this.baseUrl}/games/${gameId}/join`,
+        { guestName: guestName ?? null },
+        { headers: this.guestHeaders(gameId) },
+      ),
     );
 
     if (result.guestSecret) {
@@ -50,11 +53,11 @@ export class GamePlayService {
     this.actionError.set(null);
     try {
       const state = await firstValueFrom(
-        this.http.post<GameState>(`${this.baseUrl}/games/${gameId}/actions`, {
-          action,
-          spaceId: spaceId ?? null,
-          guestSecret: this.guestSecretFor(gameId),
-        }),
+        this.http.post<GameState>(
+          `${this.baseUrl}/games/${gameId}/actions`,
+          { action, spaceId: spaceId ?? null },
+          { headers: this.guestHeaders(gameId) },
+        ),
       );
       this.state.set(state);
     } catch (error: unknown) {
@@ -73,14 +76,11 @@ export class GamePlayService {
     this.actionError.set(null);
     try {
       const state = await firstValueFrom(
-        this.http.post<GameState>(`${this.baseUrl}/games/${gameId}/trades`, {
-          targetId,
-          offeredSpaceIds,
-          requestedSpaceIds,
-          offeredMoney,
-          requestedMoney,
-          guestSecret: this.guestSecretFor(gameId),
-        }),
+        this.http.post<GameState>(
+          `${this.baseUrl}/games/${gameId}/trades`,
+          { targetId, offeredSpaceIds, requestedSpaceIds, offeredMoney, requestedMoney },
+          { headers: this.guestHeaders(gameId) },
+        ),
       );
       this.state.set(state);
     } catch (error: unknown) {
@@ -92,10 +92,11 @@ export class GamePlayService {
     this.actionError.set(null);
     try {
       const state = await firstValueFrom(
-        this.http.post<GameState>(`${this.baseUrl}/games/${gameId}/trades/${tradeId}/respond`, {
-          accept,
-          guestSecret: this.guestSecretFor(gameId),
-        }),
+        this.http.post<GameState>(
+          `${this.baseUrl}/games/${gameId}/trades/${tradeId}/respond`,
+          { accept },
+          { headers: this.guestHeaders(gameId) },
+        ),
       );
       this.state.set(state);
     } catch (error: unknown) {
@@ -118,14 +119,71 @@ export class GamePlayService {
       this.state.set({ ...incoming, yourParticipantId: mine });
     });
 
-    connection.onreconnected(() => void connection.invoke('JoinGame', gameId));
+    connection.onreconnected(async (connectionId) => {
+      try {
+        await connection.invoke('JoinGame', gameId);
+        // connectionId est celui de la nouvelle connexion, fourni par SignalR.
+        await this.resumeSeat(gameId, connectionId ?? connection.connectionId);
+      } catch {
+        // Ne pas laisser échapper le rejet : la reconnexion automatique
+        // retentera, et l'écran reste utilisable en lecture d'ici là.
+      }
+    });
     connection.onclose(() => this.connected.set(false));
 
     await connection.start();
     await connection.invoke('JoinGame', gameId);
+    await this.resumeSeat(gameId, connection.connectionId);
 
     this.connection = connection;
     this.connected.set(true);
+  }
+
+  /**
+   * Reprend la main sur notre siège, puis rattache la connexion temps réel.
+   *
+   * Une coupure réseau, même brève, fait passer le siège à un Bot de repli
+   * côté serveur (bascule immédiate, sans délai de grâce). Sans cette reprise
+   * le joueur revient devant son plateau pendant qu'un bot continue de jouer
+   * ses tours : ni la reconnexion SignalR ni un rechargement de page ne
+   * repassaient IsConnected à true, seul /join le fait.
+   */
+  private async resumeSeat(gameId: string, connectionId: string | null): Promise<void> {
+    const state = this.state();
+    const mine = state?.players.find((p) => p.id === state.yourParticipantId);
+
+    if (mine && (mine.kind === 'BotDeRepli' || !mine.isConnected)) {
+      try {
+        await this.join(gameId);
+      } catch {
+        // Siège irrécupérable (secret perdu, session expirée) : on reste
+        // spectateur plutôt que de bloquer l'écran.
+      }
+    }
+
+    // Toujours après la reprise : le serveur doit associer le siège rendu à la
+    // nouvelle connexion, dont le connectionId vient de changer.
+    await this.announcePresence(gameId, connectionId);
+  }
+
+  /**
+   * Dit au serveur quelle connexion temps réel occupe notre siège. Sans cela,
+   * une déconnexion ne peut pas rendre le siège à un Bot de repli et la partie
+   * se fige sur le joueur absent.
+   */
+  private async announcePresence(gameId: string, connectionId: string | null): Promise<void> {
+    if (!connectionId) return;
+    try {
+      await firstValueFrom(
+        this.http.post<void>(
+          `${this.baseUrl}/games/${gameId}/presence`,
+          { connectionId },
+          { headers: this.guestHeaders(gameId) },
+        ),
+      );
+    } catch {
+      // Un spectateur n'a pas de siège : l'échec est sans conséquence.
+    }
   }
 
   async disconnectRealtime(): Promise<void> {
@@ -134,6 +192,16 @@ export class GamePlayService {
     this.connection = null;
     this.connected.set(false);
     await connection.stop();
+  }
+
+  /**
+   * Le laissez-passer d'un invité voyage en en-tête sur toutes les routes qui
+   * l'exigent : uniforme, et jamais dans une URL — une query string finit dans
+   * les journaux des proxys et l'historique du navigateur.
+   */
+  private guestHeaders(gameId: string): Record<string, string> {
+    const secret = this.guestSecretFor(gameId);
+    return secret ? { 'X-Guest-Secret': secret } : {};
   }
 
   guestSecretFor(gameId: string): string | null {
