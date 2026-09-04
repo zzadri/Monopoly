@@ -27,7 +27,6 @@ public class GetGameQueryHandler(IMonopolyDbContext context) : IRequestHandler<G
             game.Options.CagnotteVacances,
             game.Options.Encheres,
             game.Options.PasDeLoyerEnPrison,
-            game.Options.HypothequeSansLoyer,
             game.Options.ConstructionEquilibree,
             game.Options.MelangerOrdreJoueurs,
             game.Participants

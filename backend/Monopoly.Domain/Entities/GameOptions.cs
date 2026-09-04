@@ -10,7 +10,6 @@ public class GameOptions
     public bool CagnotteVacances { get; set; }
     public bool Encheres { get; set; }
     public bool PasDeLoyerEnPrison { get; set; }
-    public bool HypothequeSansLoyer { get; set; }
     public bool ConstructionEquilibree { get; set; } = true;
     public decimal ArgentDepart { get; set; } = 1500m;
     public bool MelangerOrdreJoueurs { get; set; }

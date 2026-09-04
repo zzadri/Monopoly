@@ -554,6 +554,10 @@ public sealed class GameEngine(GameAggregate state, Random random)
             }
         }
 
+        // Une faillite envers la banque n'est infligée par personne.
+        if (creditor is not null)
+            creditor.BankruptciesInflicted++;
+
         if (creditor is not null && actor.Money > 0)
         {
             creditor.Money += actor.Money;

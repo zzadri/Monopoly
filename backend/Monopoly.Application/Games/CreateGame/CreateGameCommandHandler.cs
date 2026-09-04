@@ -57,7 +57,6 @@ public class CreateGameCommandHandler(
                 CagnotteVacances = request.CagnotteVacances,
                 Encheres = request.Encheres,
                 PasDeLoyerEnPrison = request.PasDeLoyerEnPrison,
-                HypothequeSansLoyer = request.HypothequeSansLoyer,
                 ConstructionEquilibree = request.ConstructionEquilibree,
                 ArgentDepart = request.ArgentDepart,
                 MelangerOrdreJoueurs = request.MelangerOrdreJoueurs,

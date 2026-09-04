@@ -86,9 +86,12 @@ export class CreateGame implements OnInit {
 
   protected loyerDoubleEnsembleComplet = false;
   protected cagnotteVacances = false;
-  protected encheres = true;
+  // Lot 6 : le moteur ignore encore cette option (GameEngine.DeclinePendingProperty).
+  // Décochée et verrouillée tant qu'elle n'a pas d'effet, pour ne pas laisser
+  // croire à une règle active. Le champ reste envoyé à l'API, qui le persiste.
+  protected readonly encheresDisponibles = false;
+  protected encheres = false;
   protected pasDeLoyerEnPrison = false;
-  protected hypothequeSansLoyer = false;
   protected constructionEquilibree = true;
 
   protected turnLimit = 200;
@@ -135,7 +138,6 @@ export class CreateGame implements OnInit {
         cagnotteVacances: this.cagnotteVacances,
         encheres: this.encheres,
         pasDeLoyerEnPrison: this.pasDeLoyerEnPrison,
-        hypothequeSansLoyer: this.hypothequeSansLoyer,
         constructionEquilibree: this.constructionEquilibree,
         turnLimit: Number(this.turnLimit) || 0,
         botCount: this.botCount(),

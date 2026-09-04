@@ -24,9 +24,14 @@ export class GamePlayService {
   }
 
   async loadState(gameId: string): Promise<GameState> {
+    // Le secret d'invité part en en-tête : en query string il finirait dans les
+    // journaux des proxys et dans l'historique du navigateur.
     const secret = this.guestSecretFor(gameId);
-    const url = `${this.baseUrl}/games/${gameId}/state${secret ? `?guestSecret=${secret}` : ''}`;
-    const state = await firstValueFrom(this.http.get<GameState>(url));
+    const state = await firstValueFrom(
+      this.http.get<GameState>(`${this.baseUrl}/games/${gameId}/state`, {
+        headers: secret ? { 'X-Guest-Secret': secret } : {},
+      }),
+    );
     this.state.set(state);
     return state;
   }
@@ -118,14 +123,39 @@ export class GamePlayService {
       this.state.set({ ...incoming, yourParticipantId: mine });
     });
 
-    connection.onreconnected(() => void connection.invoke('JoinGame', gameId));
+    connection.onreconnected(() => {
+      void connection.invoke('JoinGame', gameId);
+      // Nouvelle connexion = nouveau connectionId : sans ce ré-enregistrement,
+      // le serveur ne saurait plus quel siège elle occupe.
+      void this.announcePresence(gameId, connection.connectionId);
+    });
     connection.onclose(() => this.connected.set(false));
 
     await connection.start();
     await connection.invoke('JoinGame', gameId);
+    await this.announcePresence(gameId, connection.connectionId);
 
     this.connection = connection;
     this.connected.set(true);
+  }
+
+  /**
+   * Dit au serveur quelle connexion temps réel occupe notre siège. Sans cela,
+   * une déconnexion ne peut pas rendre le siège à un Bot de repli et la partie
+   * se fige sur le joueur absent.
+   */
+  private async announcePresence(gameId: string, connectionId: string | null): Promise<void> {
+    if (!connectionId) return;
+    try {
+      await firstValueFrom(
+        this.http.post<void>(`${this.baseUrl}/games/${gameId}/presence`, {
+          connectionId,
+          guestSecret: this.guestSecretFor(gameId),
+        }),
+      );
+    } catch {
+      // Un spectateur n'a pas de siège : l'échec est sans conséquence.
+    }
   }
 
   async disconnectRealtime(): Promise<void> {

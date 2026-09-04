@@ -157,6 +157,24 @@
   flex-shrink: 0;
 }
 
+.create-game__checkbox--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.create-game__soon {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: 0.05em;
+}
+
 .create-game__subtitle {
   font-size: 1rem;
   font-weight: 600;

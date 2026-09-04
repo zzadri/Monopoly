@@ -92,19 +92,22 @@
       Cagnotte "Vacances" (empoche les impôts et versements bancaires)
     </label>
 
-    <label class="create-game__checkbox">
-      <input type="checkbox" [(ngModel)]="encheres" name="encheres" />
-      Enchères sur les propriétés refusées à l'achat
+    <label class="create-game__checkbox create-game__checkbox--disabled">
+      <input
+        type="checkbox"
+        [(ngModel)]="encheres"
+        name="encheres"
+        [disabled]="!encheresDisponibles"
+      />
+      <span>
+        Enchères sur les propriétés refusées à l'achat
+        <em class="create-game__soon">bientôt disponible</em>
+      </span>
     </label>
 
     <label class="create-game__checkbox">
       <input type="checkbox" [(ngModel)]="pasDeLoyerEnPrison" name="pasDeLoyerEnPrison" />
       Pas de loyer sur les propriétés d'un joueur emprisonné
-    </label>
-
-    <label class="create-game__checkbox">
-      <input type="checkbox" [(ngModel)]="hypothequeSansLoyer" name="hypothequeSansLoyer" />
-      Hypothèque : plus de loyer perçu sur un terrain hypothéqué
     </label>
 
     <label class="create-game__checkbox">
