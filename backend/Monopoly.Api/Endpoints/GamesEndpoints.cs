@@ -12,9 +12,10 @@ namespace Monopoly.Api.Endpoints;
 public static class GamesEndpoints
 {
     /// <summary>
-    /// Le laissez-passer d'un invité voyage en en-tête, jamais en query string :
-    /// une URL est journalisée par les proxys et conservée par l'historique du
-    /// navigateur, ce qui laisserait prendre le contrôle d'un siège.
+    /// Le laissez-passer d'un invité voyage en en-tête sur toutes les routes qui
+    /// l'exigent, jamais en query string ni dans un corps de requête : une URL est
+    /// journalisée par les proxys et conservée par l'historique du navigateur, et
+    /// un emplacement unique évite qu'une route l'expose autrement que les autres.
     /// </summary>
     public const string GuestSecretHeader = "X-Guest-Secret";
 
@@ -52,13 +53,14 @@ public static class GamesEndpoints
         group.MapPost("/{id:guid}/presence", async (
             Guid id,
             PresenceBody body,
+            [FromHeader(Name = GuestSecretHeader)] string? guestSecret,
             ISender sender,
             GamePresence presence,
             CancellationToken ct) =>
         {
             if (string.IsNullOrWhiteSpace(body.ConnectionId)) return Results.BadRequest();
 
-            var state = await sender.Send(new GetGameStateQuery(id, body.GuestSecret), ct);
+            var state = await sender.Send(new GetGameStateQuery(id, guestSecret), ct);
             if (state.YourParticipantId is not { } participantId) return Results.NoContent();
 
             presence.Track(body.ConnectionId, id, participantId);
@@ -68,11 +70,12 @@ public static class GamesEndpoints
         group.MapPost("/{id:guid}/join", async (
             Guid id,
             JoinGameBody? body,
+            [FromHeader(Name = GuestSecretHeader)] string? guestSecret,
             ISender sender,
             IHubContext<GameHub> hub,
             CancellationToken ct) =>
         {
-            var result = await sender.Send(new JoinGameCommand(id, body?.GuestName, body?.GuestSecret), ct);
+            var result = await sender.Send(new JoinGameCommand(id, body?.GuestName, guestSecret), ct);
             await BroadcastAsync(hub, id, result.State, ct);
             return Results.Ok(result);
         });
@@ -80,11 +83,12 @@ public static class GamesEndpoints
         group.MapPost("/{id:guid}/actions", async (
             Guid id,
             GameActionBody body,
+            [FromHeader(Name = GuestSecretHeader)] string? guestSecret,
             ISender sender,
             IHubContext<GameHub> hub,
             CancellationToken ct) =>
         {
-            var state = await sender.Send(new PerformGameActionCommand(id, body.Action, body.SpaceId, body.GuestSecret), ct);
+            var state = await sender.Send(new PerformGameActionCommand(id, body.Action, body.SpaceId, guestSecret), ct);
             await BroadcastAsync(hub, id, state, ct);
             return Results.Ok(state);
         });
@@ -92,13 +96,14 @@ public static class GamesEndpoints
         group.MapPost("/{id:guid}/trades", async (
             Guid id,
             ProposeTradeBody body,
+            [FromHeader(Name = GuestSecretHeader)] string? guestSecret,
             ISender sender,
             IHubContext<GameHub> hub,
             CancellationToken ct) =>
         {
             var state = await sender.Send(new ProposeTradeCommand(
                 id, body.TargetId, body.OfferedSpaceIds ?? [], body.RequestedSpaceIds ?? [],
-                body.OfferedMoney, body.RequestedMoney, body.GuestSecret), ct);
+                body.OfferedMoney, body.RequestedMoney, guestSecret), ct);
             await BroadcastAsync(hub, id, state, ct);
             return Results.Ok(state);
         });
@@ -107,11 +112,12 @@ public static class GamesEndpoints
             Guid id,
             Guid tradeId,
             RespondTradeBody body,
+            [FromHeader(Name = GuestSecretHeader)] string? guestSecret,
             ISender sender,
             IHubContext<GameHub> hub,
             CancellationToken ct) =>
         {
-            var state = await sender.Send(new RespondTradeCommand(id, tradeId, body.Accept, body.GuestSecret), ct);
+            var state = await sender.Send(new RespondTradeCommand(id, tradeId, body.Accept, guestSecret), ct);
             await BroadcastAsync(hub, id, state, ct);
             return Results.Ok(state);
         });
@@ -124,9 +130,11 @@ public static class GamesEndpoints
     private static Task BroadcastAsync(IHubContext<GameHub> hub, Guid gameId, GameStateDto state, CancellationToken ct) =>
         hub.Clients.Group(gameId.ToString()).SendAsync("gameStateChanged", state with { YourParticipantId = null }, ct);
 
-    public record JoinGameBody(string? GuestName, string? GuestSecret);
-    public record PresenceBody(string ConnectionId, string? GuestSecret);
-    public record ProposeTradeBody(Guid TargetId, List<Guid>? OfferedSpaceIds, List<Guid>? RequestedSpaceIds, decimal OfferedMoney, decimal RequestedMoney, string? GuestSecret);
-    public record RespondTradeBody(bool Accept, string? GuestSecret);
-    public record GameActionBody(GameActionType Action, Guid? SpaceId, string? GuestSecret);
+    // Aucun de ces corps ne porte le secret d'invité : il voyage uniformément
+    // en en-tête X-Guest-Secret sur toutes les routes qui l'exigent.
+    public record JoinGameBody(string? GuestName);
+    public record PresenceBody(string ConnectionId);
+    public record ProposeTradeBody(Guid TargetId, List<Guid>? OfferedSpaceIds, List<Guid>? RequestedSpaceIds, decimal OfferedMoney, decimal RequestedMoney);
+    public record RespondTradeBody(bool Accept);
+    public record GameActionBody(GameActionType Action, Guid? SpaceId);
 }
