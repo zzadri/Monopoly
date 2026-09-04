@@ -1,7 +1,8 @@
 # Old reference project - never pushed
 old projet monopoly/
-# ne pas psuh les docs du projets
-docs/ 
+# Cahier des charges : document de cours, non publié.
+# Les ADR et le plan d'implémentation, eux, sont versionnés avec le code.
+docs/cdc/
 
 # Env
 .env
@@ -18,7 +19,8 @@ backend/**/bin/
 backend/**/obj/
 backend/**/*.user
 
-# IDE / OS
+# IDE / OS / outillage
+.claude/
 .vscode/
 .idea/
 .DS_Store
