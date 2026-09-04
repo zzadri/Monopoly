@@ -1,0 +1,165 @@
+<section class="create-game">
+  <div class="create-game__preview">
+    <h2 class="create-game__preview-title">Plateau par défaut</h2>
+
+    @if (board(); as b) {
+      <div
+        class="board-preview"
+        [style.grid-template-rows]="'repeat(' + b.rows + ', 1fr)'"
+        [style.grid-template-columns]="'repeat(' + b.columns + ', 1fr)'"
+      >
+        @for (cell of previewCells(); track cell.title) {
+          <div
+            [class]="'board-preview__cell board-preview__cell--band-' + cell.bandSide"
+            [class.board-preview__cell--corner]="cell.isCorner"
+            [style.grid-row]="cell.row + 1"
+            [style.grid-column]="cell.col + 1"
+            [title]="cell.title"
+          >
+            @if (cell.color) {
+              <span class="board-preview__band" [style.background]="cell.color"></span>
+            }
+            <span class="board-preview__name">{{ cell.name }}</span>
+            @if (cell.price) {
+              <span class="board-preview__price">{{ cell.price }} €</span>
+            }
+          </div>
+        }
+
+        <div
+          class="board-preview__center"
+          [style.grid-row]="'2 / ' + b.rows"
+          [style.grid-column]="'2 / ' + b.columns"
+        >
+          <span class="board-preview__center-title">Monopoly</span>
+          <span class="board-preview__center-sub">{{ b.spaces.length }} cases</span>
+        </div>
+      </div>
+    } @else if (boardError()) {
+      <p class="create-game__preview-error">{{ boardError() }}</p>
+    } @else {
+      <p class="create-game__preview-loading">Chargement de l'aperçu…</p>
+    }
+  </div>
+
+  <form class="create-game__form" (ngSubmit)="submitCreateGame()">
+    <h1 class="create-game__title">Nouveau salon</h1>
+
+    <div class="create-game__row">
+      <div class="create-game__field">
+        <label class="create-game__label" for="maxPlayers">Joueurs maximum</label>
+        <input
+          class="create-game__input"
+          id="maxPlayers"
+          type="number"
+          min="2"
+          max="8"
+          [(ngModel)]="maxPlayers"
+          name="maxPlayers"
+          required
+        />
+      </div>
+
+      <div class="create-game__field">
+        <label class="create-game__label" for="argentDepart">Argent de départ</label>
+        <select class="create-game__input" id="argentDepart" [(ngModel)]="argentDepart" name="argentDepart">
+          @for (amount of startingMoneyOptions; track amount) {
+            <option [value]="amount">{{ amount }} €</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <label class="create-game__checkbox">
+      <input type="checkbox" [(ngModel)]="isPrivate" name="isPrivate" />
+      Salon privé
+    </label>
+
+    <label class="create-game__checkbox">
+      <input type="checkbox" [(ngModel)]="melangerOrdreJoueurs" name="melangerOrdreJoueurs" />
+      Mélanger l'ordre des joueurs au début de la partie
+    </label>
+
+    <h3 class="create-game__subtitle">Règles</h3>
+
+    <label class="create-game__checkbox">
+      <input type="checkbox" [(ngModel)]="loyerDoubleEnsembleComplet" name="loyerDoubleEnsembleComplet" />
+      Loyer doublé pour les ensembles immobiliers complets
+    </label>
+
+    <label class="create-game__checkbox">
+      <input type="checkbox" [(ngModel)]="cagnotteVacances" name="cagnotteVacances" />
+      Cagnotte "Vacances" (empoche les impôts et versements bancaires)
+    </label>
+
+    <label class="create-game__checkbox">
+      <input type="checkbox" [(ngModel)]="encheres" name="encheres" />
+      Enchères sur les propriétés refusées à l'achat
+    </label>
+
+    <label class="create-game__checkbox">
+      <input type="checkbox" [(ngModel)]="pasDeLoyerEnPrison" name="pasDeLoyerEnPrison" />
+      Pas de loyer sur les propriétés d'un joueur emprisonné
+    </label>
+
+    <label class="create-game__checkbox">
+      <input type="checkbox" [(ngModel)]="hypothequeSansLoyer" name="hypothequeSansLoyer" />
+      Hypothèque : plus de loyer perçu sur un terrain hypothéqué
+    </label>
+
+    <label class="create-game__checkbox">
+      <input type="checkbox" [(ngModel)]="constructionEquilibree" name="constructionEquilibree" />
+      Construction équilibrée des maisons et hôtels
+    </label>
+
+    <div class="create-game__field">
+      <label class="create-game__label" for="turnLimit">
+        Limite de tours (0 = illimité, le plus riche gagne à la fin)
+      </label>
+      <input
+        class="create-game__input"
+        id="turnLimit"
+        type="number"
+        min="0"
+        max="2000"
+        step="50"
+        [(ngModel)]="turnLimit"
+        name="turnLimit"
+      />
+    </div>
+
+    <h3 class="create-game__subtitle">Bots</h3>
+
+    <label class="create-game__checkbox">
+      <input type="checkbox" [(ngModel)]="withBots" name="withBots" />
+      Compléter le salon avec des bots
+    </label>
+
+    @if (withBots) {
+      <div class="create-game__field">
+        <label class="create-game__label" for="botDifficulty">Difficulté des bots</label>
+        <select class="create-game__input" id="botDifficulty" [(ngModel)]="botDifficulty" name="botDifficulty">
+          @for (difficulty of botDifficulties; track difficulty) {
+            <option [value]="difficulty">{{ botDifficultyLabels[difficulty] }}</option>
+          }
+        </select>
+      </div>
+
+      <p class="create-game__note">
+        {{ botCount() }} bot(s) rejoindront pour remplir les {{ maxPlayers }} places.
+        Une partie avec bots ne compte pas pour l'XP ni les classements.
+      </p>
+    }
+
+    @if (errorMessage()) {
+      <p class="create-game__error">{{ errorMessage() }}</p>
+    }
+
+    <div class="create-game__actions">
+      <button class="create-game__cancel" type="button" (click)="cancel()">Annuler</button>
+      <button class="create-game__submit" type="submit" [disabled]="submitting() || !board()">
+        {{ submitting() ? 'Ouverture…' : 'Lancer la partie' }}
+      </button>
+    </div>
+  </form>
+</section>

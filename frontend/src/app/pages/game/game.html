@@ -1,0 +1,407 @@
+@if (loading()) {
+  <p class="game__status">Chargement de la partie…</p>
+} @else if (loadError()) {
+  <p class="game__status game__status--error">{{ loadError() }}</p>
+} @else if (state(); as s) {
+  <section class="game">
+    <!-- ---------------------------------------------------------- Plateau -->
+    <div class="game__board-wrap">
+      <div
+        class="board"
+        [style.grid-template-rows]="'repeat(' + s.rows + ', 1fr)'"
+        [style.grid-template-columns]="'repeat(' + s.columns + ', 1fr)'"
+      >
+        @for (cell of cells(); track cell.space.id) {
+          <div
+            [class]="'board__cell board__cell--band-' + cell.bandSide"
+            [class.board__cell--owned]="!!cell.owner"
+            [class.board__cell--mortgaged]="cell.space.isMortgaged"
+            [class.board__cell--corner]="cell.isCorner"
+            [style.grid-row]="cell.row + 1"
+            [style.grid-column]="cell.col + 1"
+            [title]="spaceTitle(cell)"
+          >
+            @if (cell.space.groupColorHex) {
+              <span class="board__band" [style.background]="cell.space.groupColorHex"></span>
+            }
+
+            @if (cell.icon) {
+              <span class="board__icon">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  @switch (cell.icon) {
+                    @case ('start') {
+                      <path d="M4 12h11m0 0-4-4m4 4-4 4M17 5v14" />
+                    }
+                    @case ('jail') {
+                      <path d="M4 4v16M9 4v16M15 4v16M20 4v16M4 12h16" />
+                    }
+                    @case ('gotojail') {
+                      <path d="M3 12h9m0 0-3-3m3 3-3 3M16 4v16M21 4v16" />
+                    }
+                    @case ('vacation') {
+                      <path d="M12 11v9M12 11c-3-4-7-4-9-1 3-2 6 0 9 1Zm0 0c3-4 7-4 9-1-3-2-6 0-9 1ZM7 20h10" />
+                    }
+                    @case ('chance') {
+                      <path d="M9 9a3 3 0 1 1 4 2.8c-.7.3-1 1-1 1.7v.5M12 17.5v.5" />
+                    }
+                    @case ('chest') {
+                      <path d="M4 9h16v9H4zM4 9l1-4h14l1 4M12 9v9M9.5 12.5h5" />
+                    }
+                    @case ('tax') {
+                      <path d="M7 17 17 7M8.5 8.5v0M15.5 15.5v0M4 4h16v16H4z" />
+                    }
+                    @case ('train') {
+                      <path d="M6 4h12v10H6zM6 14l-2 5m14-5 2 5M9 18h6M9.5 8.5v0M14.5 8.5v0" />
+                    }
+                    @case ('power') {
+                      <path d="M13 3 5 14h6l-1 7 8-11h-6l1-7Z" />
+                    }
+                    @case ('water') {
+                      <path d="M12 3s6 6.5 6 10.5a6 6 0 0 1-12 0C6 9.5 12 3 12 3Z" />
+                    }
+                  }
+                </svg>
+              </span>
+            }
+
+            <span class="board__name">{{ cell.space.name }}</span>
+
+            @if (cell.subtitle) {
+              <span class="board__price">{{ cell.subtitle }}</span>
+            }
+
+            @if (cell.space.hasHotel) {
+              <span class="board__buildings">🏨</span>
+            } @else if (cell.space.houses > 0) {
+              <span class="board__buildings">
+                @for (h of [].constructor(cell.space.houses); track $index) {
+                  <span class="board__house"></span>
+                }
+              </span>
+            }
+
+            @if (cell.owner) {
+              <span class="board__owner" [style.background]="cell.owner.tokenColor" [title]="'À ' + cell.owner.displayName"></span>
+              <span class="board__owner-tint" [style.background]="cell.owner.tokenColor"></span>
+            }
+          </div>
+        }
+
+        <div class="board__center" [style.grid-row]="'2 / ' + s.rows" [style.grid-column]="'2 / ' + s.columns">
+          <p class="board__center-title">Monopoly</p>
+
+          @if (s.status === 'InProgress') {
+            <div class="dice" [class.dice--rolling]="rolling()">
+              @for (value of [s.die1, s.die2]; track $index) {
+                <div class="die" [attr.aria-label]="'Dé : ' + value">
+                  @for (slot of [0, 1, 2, 3, 4, 5, 6, 7, 8]; track slot) {
+                    <span class="die__pip" [class.die__pip--on]="diePips[value].includes(slot)"></span>
+                  }
+                </div>
+              }
+            </div>
+            <p class="board__turn">Tour {{ s.turnNumber }} — {{ currentPlayer()?.displayName }}</p>
+          }
+
+          @if (s.options.cagnotteVacances && s.freeParkingPot > 0) {
+            <p class="board__pot">Cagnotte : {{ s.freeParkingPot }} €</p>
+          }
+
+          <!-- Journal : les trois derniers coups, le dernier estompé pour appeler le scroll -->
+          <ul class="board__log">
+            @for (entry of recentEvents(); track entry.sequence) {
+              <li class="board__log-item">{{ entry.message }}</li>
+            }
+          </ul>
+        </div>
+
+        <!-- Calque des pions : positionné en pourcentage, animé en CSS -->
+        <div class="pawns" aria-hidden="true">
+          @for (token of tokens(); track token.id) {
+            <span
+              class="pawn"
+              [class.pawn--current]="token.isCurrent"
+              [style.left.%]="token.left"
+              [style.top.%]="token.top"
+              [style.background]="token.color"
+              [title]="token.name"
+            >{{ token.initial }}</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------------------------------------------------------- Panneau -->
+    <aside class="game__panel">
+      <header class="panel__header">
+        <h1 class="panel__title">{{ phaseLabel() }}</h1>
+        <span class="panel__connection" [class.panel__connection--on]="play.connected()">
+          {{ play.connected() ? 'En direct' : 'Hors ligne' }}
+        </span>
+      </header>
+
+      <!-- Actions : toujours visibles, c'est l'interaction principale -->
+      <div class="actions">
+        @if (play.actionError()) {
+          <p class="actions__error">{{ play.actionError() }}</p>
+        }
+
+        @if (s.status === 'Lobby') {
+          @if (!s.yourParticipantId) {
+            <label class="actions__label" for="guestName">Ton nom (invité)</label>
+            <input class="actions__input" id="guestName" type="text" (input)="onGuestNameInput($event)" placeholder="Invité" />
+            <button class="actions__button actions__button--primary" type="button" (click)="join()">
+              Rejoindre le salon
+            </button>
+          } @else {
+            <p class="actions__hint">{{ s.players.length }} joueur(s) dans le salon.</p>
+            <button
+              class="actions__button actions__button--primary"
+              type="button"
+              [disabled]="!canStart()"
+              (click)="act('Start')"
+            >
+              Démarrer la partie
+            </button>
+            <button class="actions__button" type="button" (click)="copyShareLink()">Copier le lien d'invitation</button>
+          }
+        } @else if (s.status === 'Finished') {
+          @for (player of s.players; track player.id) {
+            @if (player.id === s.winnerParticipantId) {
+              <p class="actions__winner">{{ player.displayName }} remporte la partie.</p>
+            }
+          }
+        } @else if (!s.yourParticipantId) {
+          <p class="actions__hint">Tu observes cette partie.</p>
+        } @else if (!isYourTurn()) {
+          <p class="actions__hint">Au tour de {{ currentPlayer()?.displayName }}…</p>
+        } @else {
+          @switch (s.phase) {
+            @case ('AwaitingRoll') {
+              <button class="actions__button actions__button--primary" type="button" (click)="act('Roll')">
+                Lancer les dés
+              </button>
+            }
+            @case ('AwaitingJailDecision') {
+              <button class="actions__button actions__button--primary" type="button" (click)="act('Roll')">
+                Tenter un doublet
+              </button>
+              <button class="actions__button" type="button" (click)="act('PayJailFine')">Payer 50 €</button>
+              @if ((you()?.getOutOfJailCards ?? 0) > 0) {
+                <button class="actions__button" type="button" (click)="act('UseJailCard')">
+                  Utiliser une carte de sortie
+                </button>
+              }
+            }
+            @case ('AwaitingPurchaseDecision') {
+              @if (s.pendingPurchase; as purchase) {
+                <p class="actions__hint">{{ purchase.name }} est libre.</p>
+                <button
+                  class="actions__button actions__button--primary"
+                  type="button"
+                  [disabled]="(you()?.money ?? 0) < purchase.price"
+                  (click)="act('Buy')"
+                >
+                  Acheter pour {{ purchase.price }} €
+                </button>
+                <button class="actions__button" type="button" (click)="act('Decline')">Passer</button>
+              }
+            }
+            @case ('AwaitingDebtSettlement') {
+              <p class="actions__hint actions__hint--debt">
+                Tu dois {{ s.pendingDebtAmount }} € : vends, hypothèque, ou déclare faillite.
+              </p>
+              <button class="actions__button actions__button--danger" type="button" (click)="act('Bankrupt')">
+                Déclarer faillite
+              </button>
+            }
+            @default {
+              <button class="actions__button actions__button--primary" type="button" (click)="act('EndTurn')">
+                Terminer le tour
+              </button>
+            }
+          }
+        }
+      </div>
+
+      <!-- Onglets -->
+      <nav class="tabs">
+        <button
+          class="tabs__tab"
+          [class.tabs__tab--active]="panelTab() === 'joueurs'"
+          type="button"
+          (click)="selectTab('joueurs')"
+        >
+          Joueurs
+        </button>
+        <button
+          class="tabs__tab"
+          [class.tabs__tab--active]="panelTab() === 'proprietes'"
+          type="button"
+          (click)="selectTab('proprietes')"
+        >
+          Propriétés
+          @if (yourProperties().length) { <span class="tabs__count">{{ yourProperties().length }}</span> }
+        </button>
+        <button
+          class="tabs__tab"
+          [class.tabs__tab--active]="panelTab() === 'echanges'"
+          type="button"
+          (click)="selectTab('echanges')"
+        >
+          Échanges
+          @if (incomingTrades().length) { <span class="tabs__count tabs__count--alert">{{ incomingTrades().length }}</span> }
+        </button>
+      </nav>
+
+      @switch (panelTab()) {
+        @case ('joueurs') {
+          <ul class="players">
+            @for (player of s.players; track player.id) {
+              <li
+                class="players__item"
+                [class.players__item--current]="player.id === s.currentParticipantId"
+                [class.players__item--bankrupt]="player.isBankrupt"
+              >
+                <span class="players__token" [style.background]="player.tokenColor"></span>
+                <span class="players__name">
+                  {{ player.displayName }}
+                  @if (player.id === s.yourParticipantId) { <em>(vous)</em> }
+                  @if (player.inPrison) { <span class="players__tag">prison</span> }
+                  @if (player.botDifficulty) { <span class="players__tag">{{ player.botDifficulty }}</span> }
+                </span>
+                <span class="players__worth">{{ player.netWorth }} €</span>
+                <span class="players__money">{{ player.money }} €</span>
+              </li>
+            }
+          </ul>
+          <p class="players__legend">Patrimoine · liquide</p>
+        }
+
+        @case ('proprietes') {
+          @if (yourProperties().length) {
+            <ul class="holdings__list">
+              @for (space of yourProperties(); track space.id) {
+                <li class="holdings__item">
+                  <span class="holdings__band" [style.background]="space.groupColorHex ?? '#999'"></span>
+                  <span class="holdings__name">
+                    {{ space.name }}
+                    @if (space.hasHotel) { <em>hôtel</em> } @else if (space.houses) { <em>{{ space.houses }} maison(s)</em> }
+                    @if (space.isMortgaged) { <em class="holdings__mortgaged">hypothéqué</em> }
+                    @if (space.currentRent) { <em class="holdings__rent">loyer {{ space.currentRent }} €</em> }
+                  </span>
+                  <span class="holdings__buttons">
+                    @if (space.canBuild) {
+                      <button class="holdings__button" type="button" (click)="act('Build', space.id)" title="Construire une maison">+</button>
+                    }
+                    @if (space.canSellBuilding) {
+                      <button class="holdings__button" type="button" (click)="act('SellBuilding', space.id)" title="Vendre une construction">−</button>
+                    }
+                    @if (space.canMortgage) {
+                      <button class="holdings__button" type="button" (click)="act('Mortgage', space.id)" title="Hypothéquer">H</button>
+                    }
+                    @if (space.canUnmortgage) {
+                      <button class="holdings__button" type="button" (click)="act('Unmortgage', space.id)" title="Lever l'hypothèque">↺</button>
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="actions__hint">Tu ne possèdes encore aucune propriété.</p>
+          }
+        }
+
+        @default {
+          @if (s.status === 'InProgress' && s.yourParticipantId) {
+            @for (offer of incomingTrades(); track offer.id) {
+              <div class="trades__offer">
+                <p class="trades__summary">
+                  <strong>{{ offer.proposerName }}</strong> te propose
+                  @if (offer.offered.length) { <span>{{ offer.offered.length }} bien(s)</span> }
+                  @if (offer.offeredMoney) { <span>{{ offer.offeredMoney }} €</span> }
+                  contre
+                  @if (offer.requested.length) { <span>{{ offer.requested.length }} bien(s)</span> }
+                  @if (offer.requestedMoney) { <span>{{ offer.requestedMoney }} €</span> }
+                </p>
+                <ul class="trades__detail">
+                  @for (space of offer.offered; track space.id) {
+                    <li>tu reçois {{ space.name }}</li>
+                  }
+                  @for (space of offer.requested; track space.id) {
+                    <li>tu cèdes {{ space.name }}</li>
+                  }
+                </ul>
+                <div class="trades__buttons">
+                  <button class="actions__button actions__button--primary" type="button" (click)="respondTrade(offer.id, true)">
+                    Accepter
+                  </button>
+                  <button class="actions__button" type="button" (click)="respondTrade(offer.id, false)">Refuser</button>
+                </div>
+              </div>
+            }
+
+            @for (offer of outgoingTrades(); track offer.id) {
+              <p class="trades__pending">
+                Offre envoyée à {{ offer.targetName }} — en attente.
+                <button class="trades__cancel" type="button" (click)="respondTrade(offer.id, false)">annuler</button>
+              </p>
+            }
+
+            <button class="actions__button" type="button" (click)="toggleTradePanel()">
+              {{ tradeOpen() ? 'Fermer' : 'Proposer un échange' }}
+            </button>
+
+            @if (tradeOpen()) {
+              <div class="trades__form">
+                <label class="actions__label" for="tradeTarget">Avec qui ?</label>
+                <select class="actions__input" id="tradeTarget" (change)="onTradeTargetChange($event)">
+                  <option value="">Choisir un joueur</option>
+                  @for (partner of tradePartners(); track partner.id) {
+                    <option [value]="partner.id">{{ partner.displayName }}</option>
+                  }
+                </select>
+
+                @if (tradeTargetId()) {
+                  <p class="trades__label">Tu donnes</p>
+                  <ul class="trades__picker">
+                    @for (space of yourProperties(); track space.id) {
+                      <li>
+                        <label class="trades__pick">
+                          <input type="checkbox" [checked]="tradeOfferedIds().includes(space.id)" (change)="toggleOffered(space.id)" />
+                          {{ space.name }}
+                        </label>
+                      </li>
+                    }
+                  </ul>
+                  <label class="actions__label" for="offeredMoney">+ argent</label>
+                  <input class="actions__input" id="offeredMoney" type="number" min="0" [value]="tradeOfferedMoney()" (input)="onOfferedMoney($event)" />
+
+                  <p class="trades__label">Tu reçois</p>
+                  <ul class="trades__picker">
+                    @for (space of partnerProperties(); track space.id) {
+                      <li>
+                        <label class="trades__pick">
+                          <input type="checkbox" [checked]="tradeRequestedIds().includes(space.id)" (change)="toggleRequested(space.id)" />
+                          {{ space.name }}
+                        </label>
+                      </li>
+                    }
+                  </ul>
+                  <label class="actions__label" for="requestedMoney">+ argent</label>
+                  <input class="actions__input" id="requestedMoney" type="number" min="0" [value]="tradeRequestedMoney()" (input)="onRequestedMoney($event)" />
+
+                  <button class="actions__button actions__button--primary" type="button" (click)="sendTrade()">
+                    Envoyer la proposition
+                  </button>
+                }
+              </div>
+            }
+          } @else {
+            <p class="actions__hint">Les échanges s'ouvrent une fois la partie lancée.</p>
+          }
+        }
+      }
+    </aside>
+  </section>
+}

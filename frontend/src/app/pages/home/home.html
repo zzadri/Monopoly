@@ -1,0 +1,27 @@
+<section class="home">
+  <div class="home__ornament" aria-hidden="true">
+    <span class="home__ornament-corner"></span>
+  </div>
+
+  <h1 class="home__title">Achète la rue.<br />Ruine la table.</h1>
+  <p class="home__subtitle">
+    @if (isAuthenticated()) {
+      Content de te revoir, {{ userName() }}. Une table t'attend.
+    } @else {
+      Loyers, hypothèques et enchères — la banque ne fait jamais crédit, même entre amis.
+    }
+  </p>
+
+  <div class="home__actions">
+    @if (isAuthenticated()) {
+      <button class="home__action home__action--primary" type="button" (click)="goToLobby()">
+        Jouer
+      </button>
+    } @else {
+      <button class="home__action home__action--primary" type="button" (click)="playAsGuest()">
+        Rejoindre en invité
+      </button>
+      <button class="home__action" type="button" (click)="login()">Se connecter</button>
+    }
+  </div>
+</section>

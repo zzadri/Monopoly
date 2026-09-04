@@ -1,0 +1,41 @@
+<div class="app-shell">
+  <header class="app-shell__header">
+    <a class="app-shell__brand" routerLink="/">Monopoly</a>
+
+    <nav class="app-shell__nav">
+      <a
+        class="app-shell__nav-link"
+        routerLink="/lobby"
+        routerLinkActive="app-shell__nav-link--active"
+        >Salons</a
+      >
+      <a
+        class="app-shell__nav-link"
+        routerLink="/leaderboard"
+        routerLinkActive="app-shell__nav-link--active"
+        >Classement</a
+      >
+    </nav>
+
+    <div class="app-shell__account">
+      <button
+        class="app-shell__theme-toggle"
+        type="button"
+        (click)="toggleTheme()"
+      >
+        {{ themeService.theme() === 'dark' ? 'Mode clair' : 'Mode sombre' }}
+      </button>
+
+      @if (authenticated()) {
+        <span class="app-shell__username">{{ username() }}</span>
+        <button class="app-shell__auth-button" type="button" (click)="logout()">Déconnexion</button>
+      } @else {
+        <button class="app-shell__auth-button" type="button" (click)="login()">Se connecter</button>
+      }
+    </div>
+  </header>
+
+  <main class="app-shell__content">
+    <router-outlet />
+  </main>
+</div>

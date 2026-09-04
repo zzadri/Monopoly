@@ -1,0 +1,57 @@
+<section class="leaderboard">
+  <h1 class="leaderboard__title">Classement — {{ data()?.label ?? 'Niveau' }}</h1>
+
+  <nav class="leaderboard__tabs">
+    @for (board of boards; track board.key) {
+      <button
+        class="leaderboard__tab"
+        [class.leaderboard__tab--active]="current() === board.key"
+        type="button"
+        (click)="load(board.key)"
+      >
+        {{ board.label }}
+      </button>
+    }
+  </nav>
+
+  @if (loading()) {
+    <p class="ledger__empty">Chargement…</p>
+  } @else if (error()) {
+    <p class="ledger__empty">{{ error() }}</p>
+  } @else if (!data()?.rows?.length) {
+    <p class="ledger__empty">Le classement se remplit après les premières parties (hors parties avec bots).</p>
+  } @else {
+    <div class="leaderboard__podium">
+      @for (row of podium(); track row.rank) {
+        <div class="leaderboard__podium-slot" [class]="'leaderboard__podium-slot--' + row.rank">
+          <span class="leaderboard__medal" [class.leaderboard__medal--gold]="row.rank === 1">{{ row.rank }}</span>
+          <span class="leaderboard__podium-name">{{ row.displayName }}</span>
+          <span class="leaderboard__podium-riser"></span>
+        </div>
+      }
+    </div>
+
+    <table class="ledger">
+      <thead>
+        <tr class="ledger__head-row">
+          <th class="ledger__head" scope="col">Rang</th>
+          <th class="ledger__head" scope="col">Joueur</th>
+          <th class="ledger__head ledger__head--num" scope="col">Niveau</th>
+          <th class="ledger__head ledger__head--num" scope="col">Victoires</th>
+          <th class="ledger__head ledger__head--num" scope="col">{{ data()?.label }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rest(); track row.rank) {
+          <tr class="ledger__row">
+            <td class="ledger__cell">{{ row.rank }}</td>
+            <td class="ledger__cell">{{ row.displayName }}</td>
+            <td class="ledger__cell ledger__cell--num">{{ row.level }}</td>
+            <td class="ledger__cell ledger__cell--num">{{ row.gamesWon }}</td>
+            <td class="ledger__cell ledger__cell--num">{{ row.value }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

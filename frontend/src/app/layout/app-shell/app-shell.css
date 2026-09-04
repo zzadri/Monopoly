@@ -1,0 +1,117 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-shell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.9rem 1.75rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.app-shell__brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.4rem;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+
+.app-shell__nav {
+  display: flex;
+  gap: 2rem;
+  margin-right: auto;
+  margin-left: 2.5rem;
+}
+
+.app-shell__nav-link {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 2px solid transparent;
+}
+
+.app-shell__nav-link:hover {
+  color: var(--ink);
+}
+
+.app-shell__nav-link--active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+.app-shell__account {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app-shell__theme-toggle {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.app-shell__theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.app-shell__username {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent-soft);
+}
+
+.app-shell__auth-button {
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius);
+  border: none;
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  color: var(--accent-ink);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-pop);
+}
+
+.app-shell__auth-button:hover {
+  background: linear-gradient(180deg, #7276f5, var(--accent));
+}
+
+.app-shell__content {
+  flex: 1;
+  padding: 3rem 2rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .app-shell__header {
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+
+  .app-shell__nav {
+    margin-left: 0;
+    order: 3;
+    width: 100%;
+  }
+
+  .app-shell__content {
+    padding: 2rem 1.25rem;
+  }
+}

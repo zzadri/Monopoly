@@ -1,0 +1,49 @@
+<section class="lobby">
+  <header class="lobby__header">
+    <h1 class="lobby__title">Salons</h1>
+
+    <div class="lobby__header-actions">
+      <button class="lobby__refresh" type="button" (click)="refresh()">Actualiser</button>
+      @if (isAuthenticated()) {
+        <button class="lobby__create-button" type="button" (click)="openCreateForm()">Ouvrir un salon</button>
+      } @else {
+        <button class="lobby__create-button" type="button" (click)="login()">Se connecter</button>
+      }
+    </div>
+  </header>
+
+  @if (!isAuthenticated()) {
+    <p class="lobby__guest-note">
+      En invité, tu peux rejoindre un salon déjà ouvert. Connecte-toi pour en ouvrir un.
+    </p>
+  }
+
+  @if (loading()) {
+    <p class="lobby__empty">Chargement des salons…</p>
+  } @else if (error()) {
+    <p class="lobby__empty lobby__empty--error">{{ error() }}</p>
+  } @else if (!games().length) {
+    <p class="lobby__empty">Aucun salon ouvert pour l'instant.</p>
+  } @else {
+    <ul class="lobby__list">
+      @for (game of games(); track game.id) {
+        <li class="room">
+          <span class="room__status" [class.room__status--live]="game.status !== 'Lobby'">
+            {{ statusLabel(game) }}
+          </span>
+
+          <span class="room__host">Salon de {{ game.hostName }}</span>
+
+          <span class="room__meta">
+            {{ game.playerCount }}/{{ game.maxPlayers }} joueurs · {{ game.argentDepart }} €
+            @if (game.hasBots) { · avec bots }
+          </span>
+
+          <button class="room__join" type="button" (click)="openGame(game)">
+            {{ game.status === 'Lobby' ? 'Rejoindre' : 'Observer' }}
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>

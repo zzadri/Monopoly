@@ -1,0 +1,143 @@
+.leaderboard__title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2.5rem;
+}
+
+.leaderboard__podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.leaderboard__podium-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.leaderboard__medal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.leaderboard__medal--gold {
+  width: 3.25rem;
+  height: 3.25rem;
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  border-color: var(--accent-soft);
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-pop);
+}
+
+.leaderboard__podium-riser {
+  width: 5.5rem;
+  border-radius: 4px 4px 0 0;
+  background: var(--surface-2);
+}
+
+.leaderboard__podium-slot--1 .leaderboard__podium-riser {
+  height: 5rem;
+  background: var(--surface-2);
+  border-top: 2px solid var(--accent);
+}
+
+.leaderboard__podium-slot--2 .leaderboard__podium-riser {
+  height: 3.5rem;
+}
+
+.leaderboard__podium-slot--3 .leaderboard__podium-riser {
+  height: 2.5rem;
+}
+
+.ledger {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ledger__head-row {
+  border-bottom: 1px solid var(--line);
+}
+
+.ledger__head {
+  text-align: left;
+  padding: 0 0.75rem 0.6rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.ledger__head--num {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.ledger__empty-row {
+  border-bottom: 1px solid var(--line);
+}
+
+.ledger__empty {
+  padding: 2.5rem 0.75rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.leaderboard__tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.leaderboard__tab {
+  padding: 0.5rem 1.1rem;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  cursor: pointer;
+  font: inherit;
+}
+
+.leaderboard__tab--active {
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  color: var(--accent-ink);
+  font-weight: 600;
+  box-shadow: var(--shadow-pop);
+}
+
+.leaderboard__podium-name {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  max-width: 6rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ledger__row {
+  border-bottom: 1px solid var(--line);
+}
+
+.ledger__cell {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.ledger__cell--num {
+  text-align: right;
+  font-family: var(--font-mono);
+}
