@@ -119,9 +119,15 @@ export class GamePlayService {
       this.state.set({ ...incoming, yourParticipantId: mine });
     });
 
-    connection.onreconnected(() => {
-      void connection.invoke('JoinGame', gameId);
-      void this.resumeSeat(gameId, connection.connectionId);
+    connection.onreconnected(async (connectionId) => {
+      try {
+        await connection.invoke('JoinGame', gameId);
+        // connectionId est celui de la nouvelle connexion, fourni par SignalR.
+        await this.resumeSeat(gameId, connectionId ?? connection.connectionId);
+      } catch {
+        // Ne pas laisser échapper le rejet : la reconnexion automatique
+        // retentera, et l'écran reste utilisable en lecture d'ici là.
+      }
     });
     connection.onclose(() => this.connected.set(false));
 
