@@ -1,0 +1,3 @@
+# Mediator.SourceGenerator plutôt que MediatR
+
+MediatR (v13+) est passé sous licence commerciale payante pour un usage en production, gratuit seulement en dev/test — inacceptable pour ce projet. On utilise `Mediator.SourceGenerator`/`Mediator.Abstractions` (martinothamar, MIT, génération de code sans réflexion) à la place : API quasi identique (`IRequest<T>`, `IRequestHandler<T,R>`, `ISender`), différences notables — `Handle` retourne `ValueTask<T>` au lieu de `Task<T>`, et les handlers sont enregistrés en Singleton par défaut (on force `ServiceLifetime.Scoped` car ils dépendent d'`IMonopolyDbContext`, scoped).

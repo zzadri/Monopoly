@@ -12,8 +12,10 @@ _Avoid_: Points, score (ambigu avec le patrimoine en jeu)
 Palier de progression du joueur dérivé de son XP cumulé. Conditionne certains déblocages (ex: création de plateaux personnalisés).
 
 **Échange (Trade)**:
-Transaction structurée entre deux joueurs, initiée par l'un et acceptée ou refusée par l'autre, portant sur une ou plusieurs Propriétés et/ou de l'argent.
+Transaction structurée entre deux joueurs, initiée par l'un et acceptée ou refusée par l'autre, portant sur une ou plusieurs Propriétés, de l'argent, et/ou des Cartes "Sortez de prison". Chaque camp est plafonné à ses liquidités : on ne peut ni offrir plus d'argent qu'on n'en possède, ni en demander plus que la cible n'en possède.
+Une **Contre-offre** est une nouvelle proposition, de rôles inversés, qui refuse et remplace la précédente. Il n'existe jamais qu'une offre vivante à la fois entre deux joueurs.
 _Avoid_: Prêt (interdit par les règles - l'Échange est une vente/troc immédiat, pas un prêt)
+_Avoid_: Contre-offre comprise comme une négociation en fil - chaque Contre-offre clôt l'offre précédente, elle ne s'y ajoute pas.
 
 **Bot**:
 Faux joueur contrôlé par le serveur. Deux cas distincts :
@@ -23,9 +25,14 @@ _Avoid_: "partie avec bot" sans préciser lequel des deux cas - les règles de c
 
 **Enchère (Auction)**:
 Vente au plus offrant d'une Propriété refusée à l'achat par le joueur qui est tombé dessus, si l'option correspondante est activée dans les paramètres de la partie. Fonctionne à l'anglaise : minuteur de 15s remis à zéro à chaque nouvelle offre, incrément libre au-dessus de la dernière offre, tous les joueurs (y compris celui qui a refusé l'achat) peuvent enchérir, adjugée au dernier enchérisseur quand le minuteur s'écoule sans nouvelle offre.
+Une offre est plafonnée aux liquidités de l'enchérisseur : on n'enchérit pas en comptant hypothéquer ensuite. Tant qu'une Enchère court, aucun joueur ne peut agir sur la partie - elle suspend tout le monde, pas seulement le joueur dont c'est le tour. Si le minuteur s'écoule sans la moindre offre, la Propriété n'est pas adjugée et redevient simplement disponible pour le prochain Joueur qui s'y arrête.
+
+**Carte "Sortez de prison"**:
+Carte identifiée, et non un compteur : il en existe exactement deux dans une Partie, l'une dans le paquet Chance, l'autre dans le paquet Caisse Commune. Conservée par le Joueur qui la tire jusqu'à usage, elle retourne **sous son propre paquet d'origine** une fois utilisée - une Partie longue ne peut donc pas les épuiser. Échangeable comme une Propriété (voir Échange).
+_Avoid_: la traiter comme une quantité interchangeable - l'origine de chaque carte détermine le paquet auquel elle revient.
 
 **Plateau personnalisé (Custom board)**:
-Plateau créé par un Joueur ayant atteint le Niveau 25. Taille de 4x4 à 20x20, les 4 cases d'angle gardent toujours leur rôle fixe (Départ, Prison/Visite, Allez en prison, Vacances). Chaque groupe de Propriétés compte au moins 2 Propriétés, sans maximum imposé de groupes ni de Propriétés par groupe. Contient 3 types de case possibles : Terrain (groupe de couleur, loyer par maison/hôtel), Gare et Compagnie (voir formules dédiées). Le créateur fixe le prix de base de chaque case ; les loyers dérivés sont calculés automatiquement (ajustables manuellement s'il le souhaite).
+Plateau créé par un Joueur ayant atteint le Niveau 25. Taille de 5x5 à 20x20, **chaque dimension indépendante** : les plateaux rectangulaires (ex. 5x12) sont autorisés. Le CdC mentionne un minimum de 2x2 ; c'est une erreur de rédaction, un plateau 2x2 se réduisant à ses 4 cases d'angle et ne comportant donc aucune Propriété. Le minimum réel est 5x5, soit 12 Propriétés. Les 4 cases d'angle gardent toujours leur rôle fixe (Départ, Prison/Visite, Allez en prison, Vacances). Chaque groupe de Propriétés compte au moins 2 Propriétés, sans maximum imposé de groupes ni de Propriétés par groupe. Contient 3 types de case possibles : Terrain (groupe de couleur, loyer par maison/hôtel), Gare et Compagnie (voir formules dédiées). Le créateur fixe le prix de base de chaque case ; les loyers dérivés sont calculés automatiquement (ajustables manuellement s'il le souhaite).
 Privé par défaut ; le créateur peut le rendre public (réversible). Un plateau public est utilisable par n'importe quel Joueur, pas seulement son créateur (bibliothèque commune), et peut être noté (1 à 5, une note par Joueur, éditable/supprimable par son auteur) et commenté (le créateur peut masquer un commentaire sur son propre plateau, pas le supprimer).
 Chaque mise à jour du créateur crée une nouvelle version ; une Partie fige la version du plateau utilisée au moment où elle démarre - une mise à jour ultérieure ne s'applique jamais rétroactivement.
 

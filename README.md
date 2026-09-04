@@ -1,14 +1,16 @@
 # Monopoly
 
 Plateforme Monopoly multijoueur en ligne : parties en temps réel, bots, échanges, classements.
-Voir [`docs/cdc/Monopoly.md`](docs/cdc/Monopoly.md) pour le cahier des charges, [`CONTEXT.md`](CONTEXT.md) pour le glossaire du domaine et [`docs/adr/`](docs/adr) pour les décisions d'architecture.
+Voir [`CONTEXT.md`](CONTEXT.md) pour le glossaire du domaine, [`docs/adr/`](docs/adr) pour les décisions d'architecture et [`docs/plan/`](docs/plan) pour le plan d'implémentation.
+Le cahier des charges (`docs/cdc/`) est un document de cours, volontairement non versionné.
 
 ## Structure
 
-- `front/` — Angular SSR (BEM, thème clair/sombre), rien en commun avec `back/`
-- `back/` — API .NET 10, clean architecture (`Monopoly.Domain` / `.Application` / `.Infrastructure` / `.Api`)
+- `frontend/` — Angular SSR (BEM, thème clair/sombre), rien en commun avec `backend/`
+- `backend/` — API .NET 10, clean architecture (`Monopoly.Domain` / `.Application` / `.Infrastructure` / `.Api`)
 - `docker/` — configuration Postgres (init), Keycloak (import de realm) et Garage (S3)
 - `docs/adr/` — décisions d'architecture
+- `docs/plan/` — plan d'implémentation, un fichier par lot
 
 ## Démarrage
 
@@ -40,16 +42,16 @@ Dés et doublets, déplacements, achats, loyers (terrains, gares, compagnies ave
 
 ```sh
 # back
-cd back && dotnet watch --project Monopoly.Api
+cd backend && dotnet watch --project Monopoly.Api
 
-# front (Node >= 24.15, voir front/.nvmrc)
-cd front && npm start
+# front (Node >= 24.15, voir frontend/.nvmrc)
+cd frontend && npm start
 ```
 
 Tests : `npm test` (Jest) et `npm run e2e` (Cucumber + Playwright, nécessite `npm start` à côté) et `npm run lint` côté front ; `dotnet build` côté back.
 
 ## À faire avant mise en prod
 
-- `front/angular.json` → `security.allowedHosts` ne contient que `localhost`/`front` : ajouter le vrai nom de domaine, sinon le serveur SSR rejette toutes les requêtes (protection SSRF native Angular).
-- `front/src/app/core/config.ts` : URLs d'API et Keycloak codées en dur pour le dev local.
-- Enchères, plateaux personnalisés, succès, titres et rejeu de partie restent à implémenter (voir CdC).
+- `frontend/angular.json` → `security.allowedHosts` ne contient que `localhost`/`front` : ajouter le vrai nom de domaine, sinon le serveur SSR rejette toutes les requêtes (protection SSRF native Angular).
+- `frontend/src/app/core/config.ts` : URLs d'API et Keycloak codées en dur pour le dev local.
+- Enchères, plateaux personnalisés, succès, titres et rejeu de partie restent à implémenter : voir [`docs/plan/`](docs/plan), qui découpe l'écart au CdC en 8 lots ordonnés.
