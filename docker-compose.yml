@@ -1,0 +1,85 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init-keycloak-db.sql:/docker-entrypoint-initdb.d/init-keycloak-db.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./docker/keycloak/realm-monopoly.json:/opt/keycloak/data/import/realm-monopoly.json:ro
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  garage:
+    image: dxflrs/garage:v1.0.1
+    restart: unless-stopped
+    volumes:
+      - ./docker/garage/garage.toml:/etc/garage.toml:ro
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+    ports:
+      - "3900:3900" # S3 API
+      - "3902:3902" # web
+      - "3903:3903" # admin
+
+  api:
+    build:
+      context: ./back
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Keycloak__Authority: "http://keycloak:8080/realms/${KEYCLOAK_REALM}"
+      Keycloak__Issuer: "http://localhost:8081/realms/${KEYCLOAK_REALM}" # ce que le navigateur voit, pas le nom docker interne
+      Keycloak__Audience: ${KEYCLOAK_API_CLIENT_ID}
+      Keycloak__RequireHttpsMetadata: "false"
+      Cors__AllowedOrigins__0: "http://localhost:${FRONT_PORT}"
+      ASPNETCORE_URLS: "http://+:8080"
+    ports:
+      - "${API_PORT}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  front:
+    build:
+      context: ./front
+    restart: unless-stopped
+    environment:
+      API_BASE_URL: "http://api:8080"
+    ports:
+      - "${FRONT_PORT}:4000" # le serveur SSR Angular écoute sur 4000, pas FRONT_PORT
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:
+  garage-meta:
+  garage-data:
